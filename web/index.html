@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AlgoPlay — Interactive Algorithm Visualizer</title>
+  <meta name="description" content="Interactive sorting and searching algorithm visualizer with synchronized pseudocode, step coaching, complexity briefing, and head-to-head race mode.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+</head>
+<body>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="brand-section">
+      <div class="logo">Algo<span class="logo-accent">Play</span></div>
+      <div class="tagline">Visualize • Learn • Explore</div>
+      <nav class="tab-nav">
+        <button id="btn-tab-sort" class="tab-btn active">↕ Sorting</button>
+        <button id="btn-tab-search" class="tab-btn">🔍 Searching</button>
+        <button id="btn-modal-race" class="action-btn">🏁 Race</button>
+        <button id="btn-modal-benchmark" class="action-btn">📊 Benchmark</button>
+        <button id="btn-modal-quiz" class="action-btn">🎮 Quiz</button>
+      </nav>
+    </div>
+
+    <div class="header-right">
+      <div id="xp-label" class="xp-badge">⚡ 0 XP</div>
+      <div class="shortcuts-hint">Space=Step • Enter=Start • R=Reset • S=Shuffle</div>
+      <button id="btn-theme-toggle" class="action-btn">
+        <span id="theme-toggle-icon">☀️ Light</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="app-container">
+
+    <!-- Algorithm Selector Strip -->
+    <section class="algo-strip">
+      <div class="strip-left">
+        <span class="strip-label">Algorithm:</span>
+        <div id="sorting-chips" class="chips-container">
+          <button class="chip-btn active" data-algo="Bubble Sort">Bubble Sort</button>
+          <button class="chip-btn" data-algo="Insertion Sort">Insertion Sort</button>
+          <button class="chip-btn" data-algo="Selection Sort">Selection Sort</button>
+          <button class="chip-btn" data-algo="Merge Sort">Merge Sort</button>
+          <button class="chip-btn" data-algo="Quick Sort">Quick Sort</button>
+        </div>
+
+        <div id="searching-chips" class="chips-container" style="display: none;">
+          <button class="chip-btn active" data-algo="Linear Search">Linear Search</button>
+          <button class="chip-btn" data-algo="Binary Search">Binary Search</button>
+        </div>
+
+        <div id="search-target-group" class="target-group" style="display: none;">
+          <span class="strip-label">Target:</span>
+          <input type="number" id="search-target-input" class="target-input" value="42">
+        </div>
+      </div>
+
+      <button id="btn-open-briefing" class="action-btn briefing-trigger-btn">
+        💡 Concept & Complexity
+      </button>
+    </section>
+
+    <!-- Main Split: Visualizer on Left, Pseudocode & Coach on Right -->
+    <div class="main-split">
+
+      <!-- Left: Visualizer Canvas -->
+      <section class="vis-card">
+        <div class="vis-header">
+          <div class="vis-title">📊 Array Visualization</div>
+          <div id="element-count-lbl" class="strip-label">20 elements 📊</div>
+        </div>
+        <div class="vis-canvas-wrapper">
+          <canvas id="main-canvas"></canvas>
+        </div>
+      </section>
+
+      <!-- Right: Pseudocode & Coach -->
+      <aside class="right-sidebar">
+
+        <!-- Pseudocode Panel -->
+        <div class="sidebar-panel code-panel">
+          <div class="panel-title">💻 Pseudocode</div>
+          <div id="pseudo-code-container" class="pseudo-container"></div>
+        </div>
+
+        <!-- Step Coach Panel -->
+        <div id="coach-card" class="sidebar-panel">
+          <div class="panel-title">💡 Step Explainer</div>
+          <div id="coach-phase" class="coach-phase">Step 1 of 4</div>
+          <div id="coach-title" class="coach-title">Ready</div>
+          <div id="coach-desc" class="coach-desc">Click 'Start' or 'Step' to begin visualization.</div>
+          <button id="btn-coach-why" class="coach-why-btn">🤔 Why? (Expand)</button>
+          <div id="coach-why-content" class="coach-why-content"></div>
+        </div>
+
+      </aside>
+    </div>
+
+    <!-- Stats & Complexity Strip -->
+    <section class="stats-strip">
+      <div class="badges-row">
+        <span class="complexity-pill pill-best">Best: <strong id="badge-best">O(n)</strong></span>
+        <span class="complexity-pill pill-avg">Avg: <strong id="badge-avg">O(n²)</strong></span>
+        <span class="complexity-pill pill-worst">Worst: <strong id="badge-worst">O(n²)</strong></span>
+        <span class="complexity-pill pill-space">Space: <strong id="badge-space">O(1)</strong></span>
+      </div>
+
+      <div class="metrics-row">
+        <div class="metric-item">Comparisons: <span id="stat-cmps" class="metric-val">0</span></div>
+        <div class="metric-item">Swaps: <span id="stat-swaps" class="metric-val">0</span></div>
+        <div class="metric-item">Status: <span id="status-text" class="metric-val">Ready</span></div>
+      </div>
+    </section>
+
+    <!-- Controls Bar -->
+    <section class="controls-bar">
+      <div class="ctrl-btn-group">
+        <button id="btn-randomize" class="action-btn">🎲 Shuffle</button>
+        <button id="btn-start" class="action-btn btn-primary">▶ Start</button>
+        <button id="btn-step" class="action-btn">⏭ Step</button>
+        <button id="btn-reset" class="action-btn">🔄 Reset</button>
+      </div>
+
+      <div class="sliders-group">
+        <div class="slider-item">
+          <span>Speed</span>
+          <input type="range" id="speed-slider" min="1" max="100" value="65">
+        </div>
+        <div class="slider-item">
+          <span>Size</span>
+          <input type="range" id="size-slider" min="5" max="50" value="20">
+        </div>
+      </div>
+
+      <div class="custom-input-group">
+        <input type="text" id="custom-array-input" class="custom-input" placeholder="e.g. 15, 8, 32, 4, 19">
+        <button id="btn-load-custom" class="action-btn">Load</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Learning Ticker -->
+  <footer class="learning-ticker">
+    <span class="ticker-icon">💡 TIP</span>
+    <span id="ticker-content">Bubble Sort repeatedly swaps adjacent out-of-order pairs until no swaps occur.</span>
+  </footer>
+
+  <!-- ───────────────────────────────────────────────────────────────────────────
+       Modals
+       ─────────────────────────────────────────────────────────────────────────── -->
+
+  <!-- Concept & Complexity Briefing Modal -->
+  <div id="briefing-modal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div id="briefing-title" class="modal-title">💡 Algorithm Briefing</div>
+        <button class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p id="briefing-desc" style="font-size: 0.85rem; color: var(--fg_secondary);"></p>
+        <div id="briefing-analogy" class="analogy-strip"></div>
+        <div>
+          <strong style="font-size: 0.8rem;">Core Invariant & Strategy:</strong>
+          <ul id="briefing-strategy" class="strategy-list"></ul>
+        </div>
+        <div class="badges-row" style="margin-top: 6px;">
+          <span class="complexity-pill pill-best">Best: <strong id="briefing-t-best">O(n)</strong></span>
+          <span class="complexity-pill pill-avg">Avg: <strong id="briefing-t-avg">O(n²)</strong></span>
+          <span class="complexity-pill pill-worst">Worst: <strong id="briefing-t-worst">O(n²)</strong></span>
+          <span class="complexity-pill pill-space">Space: <strong id="briefing-space">O(1)</strong></span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-briefing-step" class="action-btn">⏭ Step-by-Step</button>
+        <button id="btn-briefing-start" class="action-btn btn-primary">▶ Start Visualization</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Race Mode Modal -->
+  <div id="race-modal" class="modal-backdrop">
+    <div class="modal-card modal-lg">
+      <div class="modal-header">
+        <div class="modal-title">🏁 Head-to-Head Algorithm Race</div>
+        <button class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <select id="race-algo-1" class="race-select">
+              <option value="Bubble Sort">Bubble Sort</option>
+              <option value="Insertion Sort">Insertion Sort</option>
+              <option value="Selection Sort">Selection Sort</option>
+              <option value="Merge Sort">Merge Sort</option>
+              <option value="Quick Sort" selected>Quick Sort</option>
+            </select>
+            <span>vs</span>
+            <select id="race-algo-2" class="race-select">
+              <option value="Bubble Sort" selected>Bubble Sort</option>
+              <option value="Insertion Sort">Insertion Sort</option>
+              <option value="Selection Sort">Selection Sort</option>
+              <option value="Merge Sort">Merge Sort</option>
+              <option value="Quick Sort">Quick Sort</option>
+            </select>
+          </div>
+          <div id="race-status" style="font-size: 0.85rem; font-weight: 700; color: var(--accent);">Ready</div>
+        </div>
+
+        <div class="race-grid">
+          <div class="race-pane"><canvas id="race-canvas-1"></canvas></div>
+          <div class="race-pane"><canvas id="race-canvas-2"></canvas></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-reset-race" class="action-btn">🔄 Reset</button>
+        <button id="btn-start-race" class="action-btn btn-primary">▶ Start Race</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Benchmark Modal -->
+  <div id="benchmark-modal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">📊 Algorithm Benchmark Comparison</div>
+        <button class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.8rem; color: var(--fg_secondary); margin-bottom: 8px;">
+          Operations and comparisons executed on the current dataset:
+        </p>
+        <div id="benchmark-chart-body"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="action-btn modal-close-btn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quiz Modal -->
+  <div id="quiz-modal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">🎮 Predict & Win XP</div>
+        <button class="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="quiz-question" style="font-size: 0.95rem; font-weight: 700;"></div>
+        <div id="quiz-options" class="quiz-options"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

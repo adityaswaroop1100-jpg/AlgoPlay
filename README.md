@@ -2,13 +2,16 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.10%2B-blue?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.10+" />
+  <img src="https://img.shields.io/badge/Live_Demo-GitHub_Pages-2563EB?style=for-the-badge&logo=githubpages&logoColor=white" alt="Live Demo" />
   <img src="https://img.shields.io/badge/GUI-Tkinter-informational?style=for-the-badge" alt="Tkinter" />
   <img src="https://img.shields.io/badge/Dependencies-Zero%20(Stdlib)-success?style=for-the-badge" alt="Zero Dependencies" />
-  <img src="https://img.shields.io/badge/Platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey?style=for-the-badge" alt="Cross Platform" />
+  <img src="https://img.shields.io/badge/Platform-Web%20%7C%20macOS%20%7C%20Linux%20%7C%20Windows-lightgrey?style=for-the-badge" alt="Cross Platform" />
   <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License" />
 </p>
 
-An interactive, responsive desktop application built with Python and Tkinter designed to make data structures and algorithms intuitive, visual, and engaging.
+> 🌐 **Live Web Application:** Experience AlgoPlay directly in your browser without installing anything at [**adityaswaroop1100-jpg.github.io/AlgoPlay**](https://adityaswaroop1100-jpg.github.io/AlgoPlay/)
+
+An interactive, responsive visualizer designed to make data structures and algorithms intuitive, visual, and engaging. Available both as a zero-dependency Python desktop application and as a responsive web app.
 
 AlgoPlay pairs real-time animation with live pseudocode synchronization, step-by-step coaching, pre-flight algorithmic complexity briefings, head-to-head algorithm racing, and a gamified XP prediction engine — completely offline with zero external dependencies.
 
