@@ -156,6 +156,90 @@ export class CoachPanel {
       };
     }
 
+    if (algo === "Jump Search") {
+      if (isFound) {
+        return {
+          phase: "Target Found",
+          title: "Match Located in Block",
+          desc: `Target located at index ${step.found_index}!`,
+          why: "Jump Search minimizes probes by balancing jumping steps with linear scans, achieving O(√n) runtime."
+        };
+      }
+      if (step.status?.includes("Jump")) {
+        return {
+          phase: "Block Leap",
+          title: "Jump by Strides of √n",
+          desc: step.status,
+          why: "Jumping ahead by strides of m = √n skips over elements without inspecting them until the target is overshot."
+        };
+      }
+      return {
+        phase: "Linear Scan in Block",
+        title: "Scanning Bounded Interval",
+        desc: step.status,
+        why: "Once past the target, the target is guaranteed to reside in the previous block of size √n."
+      };
+    }
+
+    if (algo === "Interpolation Search") {
+      if (isFound) {
+        return {
+          phase: "Interpolation Match",
+          title: "Target Position Verified",
+          desc: `Target located at index ${step.found_index}!`,
+          why: "Interpolation search achieves O(log log n) average time on uniformly distributed data by estimating position based on value."
+        };
+      }
+      return {
+        phase: "Value Interpolation",
+        title: "Compute Probe Position",
+        desc: step.status,
+        why: "Like opening a dictionary near 'Z' when searching for 'Zebra', interpolation calculates where the value should theoretically be."
+      };
+    }
+
+    if (algo === "Exponential Search") {
+      if (isFound) {
+        return {
+          phase: "Target Located",
+          title: "Match Confirmed",
+          desc: `Target found at index ${step.found_index}!`,
+          why: "Exponential search finds the bounding range in O(log i) time, then binary searches within that range."
+        };
+      }
+      if (step.status?.includes("leap")) {
+        return {
+          phase: "Exponential Leap",
+          title: "Double Stride (1, 2, 4, 8...)",
+          desc: step.status,
+          why: "Doubling powers of two quickly brackets the target in an interval [i/2..min(i, n-1)]."
+        };
+      }
+      return {
+        phase: "Binary Search Phase",
+        title: "Search Bounded Interval",
+        desc: step.status,
+        why: "Running binary search on the bounded slice [i/2..min(i, n-1)] takes at most log2(i) comparisons."
+      };
+    }
+
+    if (algo === "Ternary Search") {
+      if (isFound) {
+        return {
+          phase: "Target Matched",
+          title: "Match at Midpoint",
+          desc: `Target found at index ${step.found_index}!`,
+          why: "Ternary search divides the search space into three parts using mid1 and mid2, eliminating 2/3 or 1/3 per step."
+        };
+      }
+      return {
+        phase: "Tri-Partition Probe",
+        title: "Evaluate Dual Midpoints",
+        desc: step.status,
+        why: "Evaluating two midpoints (mid1 and mid2) reduces the problem size by a factor of 3 at each iteration."
+      };
+    }
+
     if (algo === "Linear Search") {
       if (isFound) {
         return {

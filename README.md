@@ -73,6 +73,10 @@ AlgoPlay pairs real-time animation with live pseudocode synchronization, step-by
 | **Quick Sort** | Sorting | $\Omega(n \log n)$ | $\Theta(n \log n)$ | $O(n^2)$ | $O(\log n)$ | No |
 | **Linear Search** | Searching | $\Omega(1)$ | $\Theta(n)$ | $O(n)$ | $O(1)$ | N/A |
 | **Binary Search** | Searching | $\Omega(1)$ | $\Theta(\log n)$ | $O(\log n)$ | $O(1)$ | N/A |
+| **Jump Search** | Searching | $\Omega(1)$ | $\Theta(\sqrt{n})$ | $O(\sqrt{n})$ | $O(1)$ | N/A |
+| **Interpolation Search** | Searching | $\Omega(1)$ | $\Theta(\log \log n)$ | $O(n)$ | $O(1)$ | N/A |
+| **Exponential Search** | Searching | $\Omega(1)$ | $\Theta(\log n)$ | $O(\log n)$ | $O(1)$ | N/A |
+| **Ternary Search** | Searching | $\Omega(1)$ | $\Theta(\log_3 n)$ | $O(\log_3 n)$ | $O(1)$ | N/A |
 
 ---
 

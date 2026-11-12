@@ -693,5 +693,438 @@ export const SEARCHING_ALGORITHMS = {
         status: `Target ${target} not found in array.`
       });
     }
+  },
+
+  "Jump Search": {
+    name: "Jump Search",
+    icon: "🦘",
+    pseudo_code: [
+      "procedure jumpSearch(A, target)",
+      "  m := floor(sqrt(length(A)))",
+      "  prev := 0",
+      "  while A[min(m, n) - 1] < target do",
+      "    prev := m",
+      "    m := m + floor(sqrt(n))",
+      "  while A[prev] < target do",
+      "    prev := prev + 1",
+      "  if A[prev] == target then return prev",
+      "  return -1"
+    ],
+    info: {
+      name: "Jump Search",
+      time_best: "O(1)",
+      time_avg: "O(√n)",
+      time_worst: "O(√n)",
+      space: "O(1)",
+      description: "Jumps ahead by fixed strides of size √n, then performs linear scan backward within candidate block.",
+      analogy: "Flipping through a photo album 5 pages at a time, then checking individual photos when past the target.",
+      invariant: "Target cannot exist before index prev; if present, it must be in slice A[prev..min(m, n)-1]."
+    },
+    *run(arr, target) {
+      const a = [...arr].sort((x, y) => x - y);
+      const n = a.length;
+      const stepSz = Math.max(1, Math.floor(Math.sqrt(n)));
+      let prev = 0;
+      let step = stepSz;
+
+      yield new AlgorithmStep({
+        array: a,
+        target,
+        pseudo_line: 1,
+        status: `Jump Search: calculated step size m = √${n} = ${stepSz}`
+      });
+
+      while (step < n && a[Math.min(step, n) - 1] < target) {
+        const elim = Array.from({ length: prev }, (_, k) => k);
+        const probeIdx = Math.min(step, n) - 1;
+
+        yield new AlgorithmStep({
+          array: a,
+          comparing: [probeIdx],
+          eliminated_indices: elim,
+          target,
+          range_low: prev,
+          range_high: probeIdx,
+          pointers: { low: prev, high: probeIdx },
+          pseudo_line: 3,
+          status: `🦘 Jump probe A[${probeIdx}]=${a[probeIdx]} < ${target}`
+        });
+
+        prev = step;
+        step += stepSz;
+      }
+
+      const blockEnd = Math.min(step, n);
+      const elim = Array.from({ length: n }, (_, k) => k).filter(k => k < prev || k >= blockEnd);
+
+      yield new AlgorithmStep({
+        array: a,
+        eliminated_indices: elim,
+        target,
+        range_low: prev,
+        range_high: blockEnd - 1,
+        pointers: { low: prev, high: blockEnd - 1 },
+        pseudo_line: 6,
+        status: `Target bounded in block [${prev}..${blockEnd - 1}]. Linear scanning...`
+      });
+
+      for (let idx = prev; idx < blockEnd; idx++) {
+        yield new AlgorithmStep({
+          array: a,
+          comparing: [idx],
+          eliminated_indices: Array.from({ length: n }, (_, k) => k).filter(k => k < idx || k >= blockEnd),
+          target,
+          range_low: prev,
+          range_high: blockEnd - 1,
+          pointers: { i: idx, low: prev, high: blockEnd - 1 },
+          pseudo_line: 7,
+          status: `Scanning block: A[${idx}]=${a[idx]} vs ${target}`
+        });
+
+        if (a[idx] === target) {
+          yield new AlgorithmStep({
+            array: a,
+            found_index: idx,
+            eliminated_indices: elim,
+            target,
+            pointers: { i: idx },
+            pseudo_line: 8,
+            status: `Target ${target} found at index ${idx}!`
+          });
+          return;
+        }
+      }
+
+      yield new AlgorithmStep({
+        array: a,
+        eliminated_indices: Array.from({ length: n }, (_, k) => k),
+        target,
+        pseudo_line: 9,
+        status: `Target ${target} not found.`
+      });
+    }
+  },
+
+  "Interpolation Search": {
+    name: "Interpolation Search",
+    icon: "📖",
+    pseudo_code: [
+      "procedure interpolationSearch(A, target)",
+      "  low := 0; high := length(A) - 1",
+      "  while low <= high and A[low] <= target <= A[high] do",
+      "    pos := low + floor(((target - A[low]) * (high - low)) / (A[high] - A[low]))",
+      "    if A[pos] == target then return pos",
+      "    else if A[pos] < target then low := pos + 1",
+      "    else high := pos - 1",
+      "  return -1"
+    ],
+    info: {
+      name: "Interpolation Search",
+      time_best: "O(1)",
+      time_avg: "O(log log n)",
+      time_worst: "O(n)",
+      space: "O(1)",
+      description: "Calculates the probable position of target using linear interpolation based on numerical value magnitude.",
+      analogy: "Opening a dictionary near 'Z' when searching for 'Zebra' instead of opening the exact middle.",
+      invariant: "If present, target is strictly within A[low..high] when A[low] <= target <= A[high]."
+    },
+    *run(arr, target) {
+      const a = [...arr].sort((x, y) => x - y);
+      const n = a.length;
+      let low = 0;
+      let high = n - 1;
+
+      yield new AlgorithmStep({
+        array: a,
+        range_low: low,
+        range_high: high,
+        target,
+        pseudo_line: 1,
+        status: `Starting Interpolation Search for ${target}`
+      });
+
+      while (low <= high && a[low] <= target && target <= a[high]) {
+        let pos;
+        if (a[high] === a[low]) {
+          pos = low;
+        } else {
+          pos = low + Math.floor(((target - a[low]) * (high - low)) / (a[high] - a[low]));
+        }
+        pos = Math.max(low, Math.min(high, pos));
+
+        const elim = Array.from({ length: n }, (_, k) => k).filter(k => k < low || k > high);
+
+        yield new AlgorithmStep({
+          array: a,
+          range_low: low,
+          range_high: high,
+          comparing: [pos],
+          pivot_index: pos,
+          eliminated_indices: elim,
+          target,
+          pointers: { low, pos, high },
+          pseudo_line: 3,
+          status: `📍 Interpolated probe at index ${pos} (value ${a[pos]}) vs target ${target}`
+        });
+
+        if (a[pos] === target) {
+          yield new AlgorithmStep({
+            array: a,
+            found_index: pos,
+            range_low: low,
+            range_high: high,
+            eliminated_indices: elim,
+            target,
+            pointers: { pos },
+            pseudo_line: 4,
+            status: `Target ${target} found at index ${pos}!`
+          });
+          return;
+        } else if (a[pos] < target) {
+          low = pos + 1;
+        } else {
+          high = pos - 1;
+        }
+      }
+
+      yield new AlgorithmStep({
+        array: a,
+        eliminated_indices: Array.from({ length: n }, (_, k) => k),
+        target,
+        pseudo_line: 7,
+        status: `Target ${target} not found within range.`
+      });
+    }
+  },
+
+  "Exponential Search": {
+    name: "Exponential Search",
+    icon: "⚡🔍",
+    pseudo_code: [
+      "procedure exponentialSearch(A, target)",
+      "  if A[0] == target then return 0",
+      "  i := 1",
+      "  while i < length(A) and A[i] <= target do",
+      "    i := i * 2",
+      "  return binarySearch(A, i / 2, min(i, n - 1), target)"
+    ],
+    info: {
+      name: "Exponential Search",
+      time_best: "O(1)",
+      time_avg: "O(log n)",
+      time_worst: "O(log n)",
+      space: "O(1)",
+      description: "Bounds search range by repeated power-of-two doubling (1, 2, 4, 8...), then executes Binary Search within bounds.",
+      analogy: "Walking 1m, 2m, 4m, 8m to test WiFi range, then binary searching the bounded zone.",
+      invariant: "Target, if present, is bounded between index i/2 and min(i, n-1)."
+    },
+    *run(arr, target) {
+      const a = [...arr].sort((x, y) => x - y);
+      const n = a.length;
+
+      if (a[0] === target) {
+        yield new AlgorithmStep({
+          array: a,
+          found_index: 0,
+          target,
+          pointers: { i: 0 },
+          pseudo_line: 1,
+          status: `Target ${target} found immediately at index 0!`
+        });
+        return;
+      }
+
+      let i = 1;
+      while (i < n && a[i] <= target) {
+        yield new AlgorithmStep({
+          array: a,
+          comparing: [i],
+          target,
+          pointers: { pos: i },
+          pseudo_line: 4,
+          status: `⚡ Exponential leap to index ${i} (value ${a[i]} <= ${target})`
+        });
+
+        if (a[i] === target) {
+          yield new AlgorithmStep({
+            array: a,
+            found_index: i,
+            target,
+            pointers: { pos: i },
+            pseudo_line: 4,
+            status: `Target ${target} found at leap index ${i}!`
+          });
+          return;
+        }
+        i *= 2;
+      }
+
+      let low = Math.floor(i / 2);
+      let high = Math.min(i, n - 1);
+      const elim = Array.from({ length: n }, (_, k) => k).filter(k => k < low || k > high);
+
+      yield new AlgorithmStep({
+        array: a,
+        range_low: low,
+        range_high: high,
+        eliminated_indices: elim,
+        target,
+        pointers: { low, high },
+        pseudo_line: 5,
+        status: `Target bounded in [${low}..${high}]. Running Binary Search...`
+      });
+
+      while (low <= high) {
+        const mid = Math.floor((low + high) / 2);
+        const subElim = Array.from({ length: n }, (_, k) => k).filter(k => k < low || k > high);
+
+        yield new AlgorithmStep({
+          array: a,
+          range_low: low,
+          range_high: high,
+          comparing: [mid],
+          pivot_index: mid,
+          eliminated_indices: subElim,
+          target,
+          pointers: { low, mid, high },
+          pseudo_line: 5,
+          status: `Binary search probe mid=${mid} (value ${a[mid]}) vs ${target}`
+        });
+
+        if (a[mid] === target) {
+          yield new AlgorithmStep({
+            array: a,
+            found_index: mid,
+            range_low: low,
+            range_high: high,
+            eliminated_indices: subElim,
+            target,
+            pointers: { mid },
+            pseudo_line: 5,
+            status: `Target ${target} found at index ${mid}!`
+          });
+          return;
+        } else if (a[mid] < target) {
+          low = mid + 1;
+        } else {
+          high = mid - 1;
+        }
+      }
+
+      yield new AlgorithmStep({
+        array: a,
+        eliminated_indices: Array.from({ length: n }, (_, k) => k),
+        target,
+        pseudo_line: 5,
+        status: `Target ${target} not found.`
+      });
+    }
+  },
+
+  "Ternary Search": {
+    name: "Ternary Search",
+    icon: "📐",
+    pseudo_code: [
+      "procedure ternarySearch(A, target)",
+      "  low := 0; high := length(A) - 1",
+      "  while low <= high do",
+      "    mid1 := low + floor((high - low) / 3)",
+      "    mid2 := high - floor((high - low) / 3)",
+      "    if A[mid1] == target then return mid1",
+      "    if A[mid2] == target then return mid2",
+      "    if target < A[mid1] then high := mid1 - 1",
+      "    else if target > A[mid2] then low := mid2 + 1",
+      "    else low := mid1 + 1; high := mid2 - 1",
+      "  return -1"
+    ],
+    info: {
+      name: "Ternary Search",
+      time_best: "O(1)",
+      time_avg: "O(log₃ n)",
+      time_worst: "O(log₃ n)",
+      space: "O(1)",
+      description: "Divides sorted search interval into three equal parts using two midpoints (mid1, mid2), discarding 2/3 or 1/3 per step.",
+      analogy: "Dividing a parcel of land into three equal plots and eliminating non-promising sectors.",
+      invariant: "Target is strictly contained within the surviving one-third slice of A[low..high]."
+    },
+    *run(arr, target) {
+      const a = [...arr].sort((x, y) => x - y);
+      const n = a.length;
+      let low = 0;
+      let high = n - 1;
+
+      yield new AlgorithmStep({
+        array: a,
+        range_low: low,
+        range_high: high,
+        target,
+        pseudo_line: 1,
+        status: `Starting Ternary Search for ${target}`
+      });
+
+      while (low <= high) {
+        const mid1 = low + Math.floor((high - low) / 3);
+        const mid2 = high - Math.floor((high - low) / 3);
+        const elim = Array.from({ length: n }, (_, k) => k).filter(k => k < low || k > high);
+
+        yield new AlgorithmStep({
+          array: a,
+          range_low: low,
+          range_high: high,
+          comparing: [mid1, mid2],
+          eliminated_indices: elim,
+          target,
+          pointers: { low, mid: mid1, pos: mid2, high },
+          pseudo_line: 4,
+          status: `Tri-partition: mid1=${mid1} (${a[mid1]}), mid2=${mid2} (${a[mid2]}) vs target ${target}`
+        });
+
+        if (a[mid1] === target) {
+          yield new AlgorithmStep({
+            array: a,
+            found_index: mid1,
+            range_low: low,
+            range_high: high,
+            eliminated_indices: elim,
+            target,
+            pointers: { mid: mid1 },
+            pseudo_line: 5,
+            status: `Target ${target} found at mid1 (index ${mid1})!`
+          });
+          return;
+        }
+        if (a[mid2] === target) {
+          yield new AlgorithmStep({
+            array: a,
+            found_index: mid2,
+            range_low: low,
+            range_high: high,
+            eliminated_indices: elim,
+            target,
+            pointers: { pos: mid2 },
+            pseudo_line: 6,
+            status: `Target ${target} found at mid2 (index ${mid2})!`
+          });
+          return;
+        }
+
+        if (target < a[mid1]) {
+          high = mid1 - 1;
+        } else if (target > a[mid2]) {
+          low = mid2 + 1;
+        } else {
+          low = mid1 + 1;
+          high = mid2 - 1;
+        }
+      }
+
+      yield new AlgorithmStep({
+        array: a,
+        eliminated_indices: Array.from({ length: n }, (_, k) => k),
+        target,
+        pseudo_line: 10,
+        status: `Target ${target} not found.`
+      });
+    }
   }
 };

@@ -113,7 +113,7 @@ class AlgoPlayApp {
     this.renderPseudocode(algo.pseudo_code);
     this.updateComplexityCard(algo.info);
 
-    if (name === "Binary Search") {
+    if (name !== "Linear Search") {
       this.currentData.sort((a, b) => a - b);
     }
     this.actionReset();
@@ -181,7 +181,7 @@ class AlgoPlayApp {
     this.originalData = this.generateRandomData(this.dataSize);
     this.currentData = [...this.originalData];
 
-    if (this.currentTab === 1 && this.currentSearch === "Binary Search") {
+    if (this.currentTab === 1 && this.currentSearch !== "Linear Search") {
       this.currentData.sort((a, b) => a - b);
     }
 
@@ -195,7 +195,7 @@ class AlgoPlayApp {
   actionReset() {
     this.actionPause();
     this.currentData = [...this.originalData];
-    if (this.currentTab === 1 && this.currentSearch === "Binary Search") {
+    if (this.currentTab === 1 && this.currentSearch !== "Linear Search") {
       this.currentData.sort((a, b) => a - b);
     }
     this.activeGenerator = null;
