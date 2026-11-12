@@ -2,7 +2,7 @@
 
 import { themeManager } from "./theme.js";
 import { SORTING_ALGORITHMS, SEARCHING_ALGORITHMS, AlgorithmStep } from "./algorithms.js";
-import { VisualizerCanvas } from "./visualizer.js";
+import { VisualizerCanvas, audioEngine } from "./visualizer.js";
 import { CoachPanel } from "./coach.js";
 import { ModalController } from "./modals.js";
 
@@ -309,6 +309,15 @@ class AlgoPlayApp {
   }
 
   bindEvents() {
+    // Audio toggle
+    const audioBtn = document.getElementById("btn-audio-toggle");
+    if (audioBtn) {
+      audioBtn.onclick = () => {
+        audioEngine.enabled = !audioEngine.enabled;
+        document.getElementById("audio-toggle-icon").textContent = audioEngine.enabled ? "🔊 Sound" : "🔇 Muted";
+      };
+    }
+
     // Theme toggle
     document.getElementById("btn-theme-toggle").onclick = () => {
       const newTheme = themeManager.toggle();

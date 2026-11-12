@@ -141,14 +141,17 @@ class VisualizerCanvas(tk.Canvas):
             if bar_h >= 6:
                 cap = next((c[k] for k in c if k.startswith("bar_cap_") and c.get(k.replace("bar_cap_","bar_"))==fill), fill)
                 self.create_rectangle(x0, y0, x1, min(y0+3, y1), fill=cap, outline="", tags="bar")
-            # Double-ring glow
+            # Triple-ring radiant glow on active bars
             if is_swp:
-                self.create_rectangle(x0-2,y0-2,x1+2,y1,outline="#FCA5A5",width=1,tags="glow")
-                self.create_rectangle(x0-1,y0-1,x1+1,y1,outline="#EF4444",width=2,tags="glow")
+                self.create_rectangle(x0-3,y0-3,x1+3,y1,outline="#881337",width=1,tags="glow")
+                self.create_rectangle(x0-2,y0-2,x1+2,y1,outline="#FDA4AF",width=1,tags="glow")
+                self.create_rectangle(x0-1,y0-1,x1+1,y1,outline="#F43F5E",width=2,tags="glow")
             elif is_cmp:
+                self.create_rectangle(x0-3,y0-3,x1+3,y1,outline="#78350F",width=1,tags="glow")
                 self.create_rectangle(x0-2,y0-2,x1+2,y1,outline="#FDE68A",width=1,tags="glow")
                 self.create_rectangle(x0-1,y0-1,x1+1,y1,outline="#F59E0B",width=2,tags="glow")
             elif is_pvt:
+                self.create_rectangle(x0-2,y0-2,x1+2,y1,outline="#67E8F9",width=1,tags="glow")
                 self.create_rectangle(x0-1,y0-1,x1+1,y1,outline=c["bar_pivot"],width=2,tags="glow")
             # In-bar badge
             if bar_h >= 24 and bw >= 18:
